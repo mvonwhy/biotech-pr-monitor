@@ -1,0 +1,8 @@
+{
+  "accounts": [
+    "BioStocks",
+    "BioPharmIQ",
+    "BPharmCatalyst"
+  ],
+  "notes": "Fixed X accounts that post PR alerts. Tickers come from the Google Sheet (Ticker column), not from these handles."
+}

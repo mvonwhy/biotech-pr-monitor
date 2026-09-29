@@ -1,0 +1,3 @@
+{
+  "deprecated": true,
+  "notes": "DEPRECATED. Tickers come from Google Sheet (Ticker column) → config/tickers.json. Source X accounts live in config/source_accounts.json (BioStocks, BioPharmIQ, BPharmCatalyst). Ticker ≠ @handle."
