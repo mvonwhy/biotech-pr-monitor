@@ -31,6 +31,35 @@ Never put real passwords, API keys, or tokens into this README, into chat, or in
 3. Copy `.env.example` to `.env` and point the `op://…` lines at your 1Password item (no plaintext keys).
 4. Install dependencies, then start the monitor so it can listen and write alerts.
 
+## Using 1Password for the X API tokens
+
+This is not about creating a 1Password account — assume you already have one unlocked on the computer that runs the monitor. The idea: secrets live in 1Password; the project only stores pointers.
+
+### Create one item for this project
+
+1. Open 1Password → **New Item** (Login or API Credential).
+2. Title it: **X API – BioTech PR Monitor**.
+3. Add these labeled fields and paste the matching values from the X Developer Portal (Keys and tokens):
+
+| Field label in 1Password | What to paste from X |
+| --- | --- |
+| `username` (or custom `api_key`) | API Key |
+| `credential` (password field) | API Key Secret |
+| custom field `bearer` | Bearer Token |
+| custom field `access_token` | Access Token |
+| custom field `access_token_secret` | Access Token Secret |
+
+4. Save. Remember which **vault** holds the item (for example Private).
+
+### How the project reads them at runtime
+
+1. Your local `.env` file does **not** hold the real keys. It holds `op://` references, for example `X_BEARER_TOKEN=op://Private/ITEM_ID/bearer`.
+2. When the monitor starts, `src/secrets.py` notices any value starting with `op://` and asks the **1Password CLI** (`op read`) for that field.
+3. The real token is used in memory only. It is not written back to disk or into git.
+4. For this to work, the 1Password CLI must be installed and signed in on that machine (or a service account token available to `op`). Check with `scripts/verify_op_secrets.py` — it should report OK without printing secrets.
+
+Never paste the actual keys into chat, into GitHub, or into a committed file.
+
 ## Setting up X (Twitter) API credentials from scratch
 
 This walkthrough is for someone who has never opened the X Developer Portal. Take it one screen at a time. You will create a Project, an App inside it, then copy five secret values into 1Password.
@@ -93,44 +122,9 @@ You will deal with these one at a time. X often shows a secret **only once** —
 
 **Tip:** If the portal offers app permissions, **Read** is enough for monitoring. You do not need Write unless you plan to post from this App.
 
-### Step E — Where to paste each value (1Password)
+### Step E — Save the keys in 1Password
 
-Do this in 1Password — not in the public GitHub repo, and not in chat.
-
-1. Open **1Password**.
-2. Create a new item (Login or API Credential is fine).
-3. **Name it exactly:** `X API – BioTech PR Monitor` (so it is easy to find later).
-4. Save these fields on that one item:
-
-| What X called it | Where to put it in 1Password |
-| --- | --- |
-| API Key | Username field, **or** a custom field named `api_key` |
-| API Key Secret | Password / credential field |
-| Bearer Token | A custom field named exactly `bearer` |
-| Access Token (optional) | Custom field `access_token` |
-| Access Token Secret (optional) | Custom field `access_token_secret` |
-
-5. Save the item. Note which **vault** it lives in (for example Private) and the item’s ID if 1Password shows one — you will only need those for `op://` references, not the secret values themselves.
-
-### Step F — Point the project at 1Password (no plaintext keys)
-
-1. In the project folder, copy `.env.example` to a new file named `.env`.
-2. Fill the secret lines with **references**, not the raw keys. Example shape (replace vault name and item id with yours):
-
-```bash
-OP_X_API_ITEM_ID=YOUR_ITEM_ID_HERE
-X_API_KEY=op://Private/YOUR_ITEM_ID_HERE/username
-X_API_SECRET=op://Private/YOUR_ITEM_ID_HERE/credential
-X_BEARER_TOKEN=op://Private/YOUR_ITEM_ID_HERE/bearer
-# Optional:
-# X_ACCESS_TOKEN=op://Private/YOUR_ITEM_ID_HERE/access_token
-# X_ACCESS_TOKEN_SECRET=op://Private/YOUR_ITEM_ID_HERE/access_token_secret
-```
-
-3. Install / sign in to the **1Password CLI** on that computer so the app can read those `op://` references at runtime.
-4. Run the project’s verify script (`scripts/verify_op_secrets.py`) to confirm secrets load. It should say OK without printing the actual keys.
-
-If anything fails, double-check field names (`bearer`, credential/password field) and that you are signed into 1Password on that machine.
+Follow **Using 1Password for the X API tokens** above: create the item, label each field, then point `.env` at `op://` references (never plaintext keys).
 
 ## Privacy & secrets
 
